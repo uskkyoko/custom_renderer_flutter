@@ -28,15 +28,15 @@ class ReactWidgetBuilder extends StatelessWidget {
 
     return switch (node.type) {
       'container' => _buildContainer(context, node),
-      'text'      => _buildText(context, node),
-      'button'    => _buildButton(context, node),
-      'listitem'  => _buildListItem(context, node),
-      'input'     => _buildInput(context, node),
-      _           => _buildUnknown(node),
+      'text' => _buildText(context, node),
+      'button' => _buildButton(context, node),
+      'listitem' => _buildListItem(context, node),
+      'input' => _buildInput(context, node),
+      _ => _buildUnknown(node),
     };
   }
 
-  // ── container → Column / Row ───────────────────────────────────────────────
+  // container → Column / Row
   Widget _buildContainer(BuildContext context, WidgetNode node) {
     final isRow = node.props['flexDirection'] == 'row';
     final padding = (node.props['padding'] as num?)?.toDouble() ?? 0;
@@ -48,12 +48,20 @@ class ReactWidgetBuilder extends StatelessWidget {
     final crossAxis = _crossAxisAlignment(node.props['alignItems']);
 
     Widget box = isRow
-        ? Row(mainAxisAlignment: mainAxis, crossAxisAlignment: crossAxis, children: children)
-        : Column(mainAxisAlignment: mainAxis, crossAxisAlignment: crossAxis, children: children);
+        ? Row(
+            mainAxisAlignment: mainAxis,
+            crossAxisAlignment: crossAxis,
+            children: children,
+          )
+        : Column(
+            mainAxisAlignment: mainAxis,
+            crossAxisAlignment: crossAxis,
+            children: children,
+          );
 
-    if (padding > 0) box = Padding(padding: EdgeInsets.all(padding), child: box);
+    if (padding > 0)
+      box = Padding(padding: EdgeInsets.all(padding), child: box);
 
-    // Apply Yoga-computed size if available
     if (node.w > 0 || node.h > 0) {
       box = SizedBox(
         width: node.w > 0 ? node.w : null,
@@ -62,7 +70,6 @@ class ReactWidgetBuilder extends StatelessWidget {
       );
     }
 
-    // flex prop → Expanded
     if (node.props['flex'] != null) {
       box = Expanded(flex: (node.props['flex'] as num).toInt(), child: box);
     }
@@ -70,10 +77,12 @@ class ReactWidgetBuilder extends StatelessWidget {
     return box;
   }
 
-  // ── text → Text ───────────────────────────────────────────────────────────
+  // text → Text
   Widget _buildText(BuildContext context, WidgetNode node) {
-    final rawText = node.props['text'] as String? ??
-        node.props['children'] as String? ?? '';
+    final rawText =
+        node.props['text'] as String? ??
+        node.props['children'] as String? ??
+        '';
     final style = node.props['style'] as Map<String, dynamic>? ?? {};
 
     return Text(
@@ -89,7 +98,7 @@ class ReactWidgetBuilder extends StatelessWidget {
     );
   }
 
-  // ── button → ElevatedButton / OutlinedButton / TextButton ─────────────────
+  // button → ElevatedButton / OutlinedButton / TextButton
   Widget _buildButton(BuildContext context, WidgetNode node) {
     final label = node.props['label'] as String? ?? '';
     final variant = node.props['variant'] as String? ?? 'text';
@@ -97,21 +106,26 @@ class ReactWidgetBuilder extends StatelessWidget {
     final fgColor = colorStr == 'error'
         ? Colors.red
         : colorStr == 'primary'
-            ? Theme.of(context).colorScheme.primary
-            : null;
+        ? Theme.of(context).colorScheme.primary
+        : null;
 
     void onPressed() => registry.sendEvent('click', node.id);
     final child = Text(label);
 
     return switch (variant) {
-      'filled'   => ElevatedButton(onPressed: onPressed, style: fgColor != null
-          ? ElevatedButton.styleFrom(foregroundColor: fgColor) : null, child: child),
+      'filled' => ElevatedButton(
+        onPressed: onPressed,
+        style: fgColor != null
+            ? ElevatedButton.styleFrom(foregroundColor: fgColor)
+            : null,
+        child: child,
+      ),
       'outlined' => OutlinedButton(onPressed: onPressed, child: child),
-      _          => TextButton(onPressed: onPressed, child: child),
+      _ => TextButton(onPressed: onPressed, child: child),
     };
   }
 
-  // ── listitem → Row with leading, text, trailing ───────────────────────────
+  // listitem → Row with leading, text, trailing
   Widget _buildListItem(BuildContext context, WidgetNode node) {
     final padding = (node.props['padding'] as num?)?.toDouble() ?? 8;
     final children = node.childIds
@@ -124,37 +138,42 @@ class ReactWidgetBuilder extends StatelessWidget {
     );
   }
 
-  // ── input → TextField ─────────────────────────────────────────────────────
+  // input → TextField
   Widget _buildInput(BuildContext context, WidgetNode node) {
     final placeholder = node.props['placeholder'] as String? ?? '';
-    // Note: For a real renderer you'd use a TextEditingController synced
-    // with React state via IPC change events.
     return Expanded(
       child: TextField(
-        decoration: InputDecoration(hintText: placeholder, border: const OutlineInputBorder()),
-        onChanged: (val) => registry.sendEvent('change', node.id, {'value': val}),
+        decoration: InputDecoration(
+          hintText: placeholder,
+          border: const OutlineInputBorder(),
+        ),
+        onChanged: (val) =>
+            registry.sendEvent('change', node.id, {'value': val}),
       ),
     );
   }
 
-  // ── fallback ──────────────────────────────────────────────────────────────
+  // fallback
   Widget _buildUnknown(WidgetNode node) {
-    return Text('[unknown: ${node.type}]', style: const TextStyle(color: Colors.red));
+    return Text(
+      '[unknown: ${node.type}]',
+      style: const TextStyle(color: Colors.red),
+    );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // Helpers
   MainAxisAlignment _mainAxisAlignment(dynamic val) => switch (val) {
-        'center'        => MainAxisAlignment.center,
-        'space-between' => MainAxisAlignment.spaceBetween,
-        'flex-end'      => MainAxisAlignment.end,
-        _               => MainAxisAlignment.start,
-      };
+    'center' => MainAxisAlignment.center,
+    'space-between' => MainAxisAlignment.spaceBetween,
+    'flex-end' => MainAxisAlignment.end,
+    _ => MainAxisAlignment.start,
+  };
 
   CrossAxisAlignment _crossAxisAlignment(dynamic val) => switch (val) {
-        'center'   => CrossAxisAlignment.center,
-        'flex-end' => CrossAxisAlignment.end,
-        _          => CrossAxisAlignment.start,
-      };
+    'center' => CrossAxisAlignment.center,
+    'flex-end' => CrossAxisAlignment.end,
+    _ => CrossAxisAlignment.start,
+  };
 
   Color? _parseColor(String? hex) {
     if (hex == null) return null;

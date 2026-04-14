@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-// ─── Data model for a remote widget node ────────────────────────────────────
+// Data model for a remote widget node
 class WidgetNode {
   final String id;
   final String type;
   Map<String, dynamic> props;
   List<String> childIds;
-  // Layout from Yoga (sent as { op:"layout", x, y, w, h })
   double x, y, w, h;
 
   WidgetNode({
@@ -23,7 +22,7 @@ class WidgetNode {
   }) : childIds = childIds ?? [];
 }
 
-// ─── Registry + IPC listener ─────────────────────────────────────────────────
+// Registry + IPC listener
 class WidgetRegistry extends ChangeNotifier {
   final Map<String, WidgetNode> _nodes = {};
   String? _rootId;
@@ -32,7 +31,7 @@ class WidgetRegistry extends ChangeNotifier {
   String? get rootId => _rootId;
   WidgetNode? node(String id) => _nodes[id];
 
-  // ── Connect to the Node.js WebSocket server ──────────────────────────────
+  // Connect to the Node.js WebSocket server
   void connect(String url) {
     _channel = WebSocketChannel.connect(Uri.parse(url));
     debugPrint('[IPC] Connected to $url');
@@ -47,7 +46,7 @@ class WidgetRegistry extends ChangeNotifier {
     );
   }
 
-  // ── Send an event back to React ──────────────────────────────────────────
+  // Send an event back to React
   void sendEvent(String event, String targetId, [Map<String, dynamic>? extra]) {
     final msg = <String, dynamic>{'event': event, 'targetId': targetId};
     if (extra != null) msg.addAll(extra);
@@ -55,7 +54,7 @@ class WidgetRegistry extends ChangeNotifier {
     debugPrint('[IPC] → sent event: ${jsonEncode(msg)}');
   }
 
-  // ── Message dispatch ─────────────────────────────────────────────────────
+  // Message dispatch
   void _handleMessage(Map<String, dynamic> msg) {
     debugPrint('[IPC] ← received: ${jsonEncode(msg)}');
     final op = msg['op'] as String?;
@@ -88,14 +87,12 @@ class WidgetRegistry extends ChangeNotifier {
     final type = msg['type'] as String;
     final props = (msg['props'] as Map<String, dynamic>?) ?? {};
     _nodes[id] = WidgetNode(id: id, type: type, props: props);
-    // The first container becomes the root
     _rootId ??= id;
   }
 
   void _handleAppendChild(Map<String, dynamic> msg) {
     final parentId = msg['parentId'] as String;
     final childId = msg['childId'] as String;
-    // 'root' parentId means top-level
     if (parentId == 'root') {
       _rootId = childId;
     } else {

@@ -32,8 +32,9 @@ class _ReactFlutterAppState extends State<ReactFlutterApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'React Flutter Renderer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFDD89E3)),
         useMaterial3: true,
       ),
       home: const _RootScreen(),
@@ -49,7 +50,8 @@ class _RootScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('React → Flutter'),
-        backgroundColor: const Color(0xFF2563EB),
+        centerTitle: true,
+        backgroundColor: const Color(0xFFDD89E3),
         foregroundColor: Colors.white,
         actions: [
           // Shows IPC connection status
@@ -58,7 +60,7 @@ class _RootScreen extends StatelessWidget {
               padding: const EdgeInsets.only(right: 16),
               child: Icon(
                 reg.rootId != null ? Icons.wifi : Icons.wifi_off,
-                color: reg.rootId != null ? Colors.greenAccent : Colors.red,
+                color: reg.rootId != null ? Colors.white70 : Colors.red,
               ),
             ),
           ),
@@ -81,7 +83,7 @@ class _RootScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Run: node poc.js  (or node index.js)',
+                    'Run: npx tsx index.ts',
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                 ],
