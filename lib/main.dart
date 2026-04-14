@@ -49,22 +49,10 @@ class _RootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('React → Flutter'),
+        title: const Text('My App'),
         centerTitle: true,
         backgroundColor: const Color(0xFFDD89E3),
         foregroundColor: Colors.white,
-        actions: [
-          // Shows IPC connection status
-          Consumer<WidgetRegistry>(
-            builder: (_, reg, __) => Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Icon(
-                reg.rootId != null ? Icons.wifi : Icons.wifi_off,
-                color: reg.rootId != null ? Colors.white70 : Colors.red,
-              ),
-            ),
-          ),
-        ],
       ),
       body: Consumer<WidgetRegistry>(
         builder: (context, registry, _) {
